@@ -1,0 +1,984 @@
+// variables
+$border-radius: 3px;
+$color-blue: #48c;
+$color-red: #f55;
+$color-green: #4a5;
+$color-yellow: #dd5;
+$animation-time: 0.6s;
+$ladders: (2, 7, 8, 15, 21, 28, 36, 51, 71, 78, 87);
+$snakes: (16, 46, 49, 62, 64, 74, 89, 92, 95, 99);
+
+/***** dice animation */
+@keyframes changeOrder {
+  from { z-index: 6;}
+  to { z-index: 1; }
+}
+
+@-webkit-keyframes changeOrder {
+  from { z-index: 6; }
+  to { z-index: 1; }
+}
+
+// coment for testing 
+input { display: none; }
+
+.fx-sound { 
+  display: none; 
+  position: absolute;
+  top: -1000px;
+  left: -1000px;
+  height: 0px;
+  width: 0px;
+  overflow: hidden;
+}
+#play-fx:checked ~ {
+  label.dice:active ~ #fx-dice { display: block; }
+  #game label:active ~ .fx-sound { display: block; }
+}
+
+
+// presentation
+@import url('https://fonts.googleapis.com/css?family=Dosis|Roboto');
+
+body {
+  font-size: 16px;
+  font-family: Dosis, Roboto, Arial, Verdana, sans-serif;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: rgba(128,200,255,0.8) /*rgba(128,200,255,0.8)*/;
+}
+
+.scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.75);
+  z-index: 999;
+  .box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    background: white;
+    border-radius: $border-radius;
+    box-shadow: 0 1.5em 0.5em -1em rgba(0, 0, 0, 0.25);
+    width: 70%;
+    max-width: 375px;
+    > div {
+      padding:1rem;
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 0;
+      font-size: 1.75rem;
+      text-align: center;
+      height: 2.5rem;
+      line-height: 2.35rem;
+      background: $color-blue;
+      color: white;
+      border-radius: $border-radius $border-radius 0px 0px;
+    }
+    h2 {
+      margin-top: 1rem;
+      margin-bottom: 0.15rem;
+      font-size: 1.3rem;
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+    p:first-child {
+      margin-top: 0;
+    }
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.flex {
+  display: flex;
+  > label, > div {
+    flex: 1;
+    margin-left: 0.3rem;
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+/** start screen: configuration **/
+#options {
+  background: rgba(0,0,0,0);
+  .option-players label, label.option-start {
+    display: block;
+    margin-top: 0.5rem;
+    color: white;
+    background: rgba(0,150,48,0.6);
+    text-align: center;
+    padding: 6px;
+    transition: background 0.5s, color 0.5s;
+    box-sizing: border-box;
+    border: 2px solid transparent;
+    border-radius: $border-radius;
+    cursor: pointer;
+    &:hover {
+      background: rgba(220,220,0,0.7);
+      color: black;
+    }
+    &:active {
+      border: 2px solid rgba(0,0,0,0.1);
+    }
+    &.option-start {
+      background: $color-blue;
+      color: white;
+      margin-top: 2rem;
+      &:hover {
+        background: darken($color-blue, 5%);
+      }
+    }
+  }
+  .option-colors label {
+    opacity: 0.6;
+    margin-bottom: 0.3rem;
+    cursor: pointer;
+    //transition: opacity 0.5s; // commented as it creates weird jump
+    &:hover {
+      opacity: 0.8;
+    }
+    span {
+      flex: 1;
+      margin-left: 0.3rem;
+      border-radius: $border-radius;
+      display: inline-block;
+      padding: 3px;
+      font-size: 0.7rem;
+      border: 2px solid transparent;
+      &:first-child {
+        flex: 0;
+        margin-left: 0;
+        background: none;
+        font-size: 1rem;
+        &::before {
+          content: "\2610";
+        }
+      }
+    }
+    &:nth-child(1) span {
+      &:nth-child(2) { background: $color-green; }
+      &:nth-child(3) { background: $color-blue; }
+      &:nth-child(4) { background: $color-red; }
+      &:nth-child(5) { background: $color-yellow; }
+    }
+    &:nth-child(2) span {
+      &:nth-child(2) { background: $color-blue; }
+      &:nth-child(3) { background: $color-red; }
+      &:nth-child(4) { background: $color-yellow; }
+      &:nth-child(5) { background: $color-green; }
+    }
+    &:nth-child(3) span {
+      &:nth-child(2) { background: $color-red; }
+      &:nth-child(3) { background: $color-yellow; }
+      &:nth-child(4) { background: $color-green; }
+      &:nth-child(5) { background: $color-blue; }
+    }
+    &:nth-child(4) span {
+      &:nth-child(2) { background: $color-yellow; }
+      &:nth-child(3) { background: $color-green; }
+      &:nth-child(4) { background: $color-blue; }
+      &:nth-child(5) { background: $color-red; }
+    }
+  }
+  #activate-fx {
+    cursor: pointer;
+    &::before {
+      content: "\2610\00a0";
+    }
+  }
+}
+
+// hide the game settings when Start is pressed
+#game-time:checked ~ #options,
+[name=show-instructions]:checked ~ #options { display: none; }
+#play-fx:checked ~ #options #activate-fx::before { content: "\2612\00a0" }
+
+// control active # of players and colors
+@for $i from 1 to 5 {
+  #players#{$i}:checked {
+    ~ #options {
+      label[for=players#{$i}] {
+        background: rgba(0,150,48,1);
+        border: 2px solid rgba(0,0,0,0.1);
+        color: white;
+      }
+      @for $j from $i+1 to 5 {
+        label[for^=colors] span:nth-child(#{$j+1}){
+          display: none;
+        }
+      }
+    }
+  }
+  #colors#{$i}:checked {
+    ~ #options {
+      label[for=colors#{$i}] {
+        opacity: 1;
+        border: 0;
+        span {
+          border: 2px solid rgba(0,0,0,0.1);
+          &:first-child {
+            border: 2px solid transparent;
+            &::before {
+              content:"\2612";
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// assign colors to the game pieces according to the color scheme selected
+// TODO: this probably can be reduced with SASS as well as the code above
+#colors1:checked ~ #game #piece-player-1 g { fill: $color-green; }
+#colors1:checked ~ #game #piece-player-2 g { fill: $color-blue; }
+#colors1:checked ~ #game #piece-player-3 g { fill: $color-red; }
+#colors1:checked ~ #game #piece-player-4 g { fill: $color-yellow; }
+#colors2:checked ~ #game #piece-player-1 g { fill: $color-blue; }
+#colors2:checked ~ #game #piece-player-2 g { fill: $color-red; }
+#colors2:checked ~ #game #piece-player-3 g { fill: $color-yellow; }
+#colors2:checked ~ #game #piece-player-4 g { fill: $color-green; }
+#colors3:checked ~ #game #piece-player-1 g { fill: $color-red; }
+#colors3:checked ~ #game #piece-player-2 g { fill: $color-yellow; }
+#colors3:checked ~ #game #piece-player-3 g { fill: $color-green; }
+#colors3:checked ~ #game #piece-player-4 g { fill: $color-blue; }
+#colors4:checked ~ #game #piece-player-1 g { fill: $color-yellow; }
+#colors4:checked ~ #game #piece-player-2 g { fill: $color-green; }
+#colors4:checked ~ #game #piece-player-3 g { fill: $color-blue; }
+#colors4:checked ~ #game #piece-player-4 g { fill: $color-red; }
+
+/** info pop-up **/
+#info { 
+  display: none;
+  .box {
+    width: 75%;
+    max-width: none;
+    p:last-child {
+      text-align: right;
+    }
+    #close-button {
+      display: inline-block;
+      background: $color-green;
+      border-radius: $border-radius;
+      color: white;
+      padding: 6px 1rem;
+      cursor: pointer;
+      transition: background 0.5s;
+      &:hover {
+        background: darken($color-green, 5%);
+      }
+    }
+  }
+}
+#show-info:checked {
+  ~ #info { display: block; }
+}
+
+
+/** Instructions **/
+#instructions {
+  position: fixed;
+  z-index: 9999;
+  background-color: rgba(0,0,0,0.01);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  #go-to-game {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 1rem;
+    z-index: 3;
+    color: white;
+    cursor: pointer;
+  }
+  #step {
+    display: none;
+    position: absolute;
+    box-shadow: 0 0 50px calc(200vmax) rgba(0,0,0,0.85), inset 0 0 4px 0 rgba(0,0,0,1);
+    transform: translate(-1rem, -1rem);
+    border-radius: 100%;
+    z-index: 1;
+    top: 0;
+    left: 1rem;
+    width: calc(100px + 2rem);
+    height: calc(6rem);
+    transition: all 0.75s;
+    div {
+      position: absolute;
+      bottom: -0.5rem;
+      line-height: 1.1rem;
+      font-size: 1rem;
+      color: rgba(255,255,255,0.8);
+      left: 1rem;
+      width: 80vmin;
+      transform: translate(0, 100%);
+      -webkit-transform: translate(0, 100%);
+      label {
+        display: none;
+        font-weight: bold;
+        cursor: pointer;
+        text-decoration: underline;
+        &:hover {
+          text-decoration: none;
+        }
+        &:not([for=game-time])::before {
+          content: "Next \203A"
+        }
+      }
+    }
+  }
+}
+
+[name=show-instructions] {
+  &:checked ~ {
+    #instructions, #game, #action, #instructions #step {
+      display: block;
+    }
+  }
+}
+
+@for $i from 1 to 5 {
+  #show-instructions-#{$i}:checked ~ #instructions label[for=show-instructions-#{$i+1}] {
+    display: inline-block;
+  }
+}
+#show-instructions-5:checked ~ #instructions label[for=game-time] {
+  display: inline-block;
+}
+
+#show-instructions-1:checked ~ #instructions #step {
+  top: 0;
+  left: 1rem;
+  width: calc(100px + 2rem);
+  height: calc(6rem);
+  div::before {
+    content: "This area indicates whose turn it is at any given moment.";
+  }
+}
+#show-instructions-2:checked ~ #instructions #step {
+  top:6rem;
+  left: 1rem;
+  width: 5rem;
+  height: 5rem;
+  div::before {
+    content: "The active player clicks here to roll the dice.";
+  }
+}
+#show-instructions-3:checked ~ #instructions #step {
+  top: 50%;
+  left: 50%;
+  width: 30vw;
+  height: 30vw;
+  max-width: 500px;
+  max-height: 500px;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  div {
+    transform: translate(-20vmin, 100%);
+    -webkit-transform: translate(-20vmin, 100%);
+    left: 0;
+    &::before {
+      content: "The player's piece will advance on the board once the dice is rolled. If the piece falls on a tile with a snake's head, it will fall down to the snake's tail. If it falls on a ladder's bottom, it will go up to the top.";
+    }
+  }
+}
+#show-instructions-4:checked ~ #instructions #step {
+  top: 0;
+  left: calc(100px + 2rem);
+  width: calc(100px + 2rem);
+  height: calc(6rem);
+  div::before {
+    content: "After that, click on the button to go to the next player's turn.";
+  }
+}
+#show-instructions-5:checked ~ #instructions #step {
+  top: 0;
+  left: calc(100vw - 100px - 1rem);
+  width: calc(100px + 2rem);
+  height: calc(6rem);
+  div {
+    left: auto;
+    right: 0rem;
+    &::before {
+      content: "If you want more information during the game, click on this button."
+    }
+  }
+}
+
+#game-time:checked ~ #instructions {
+  display: none;
+}
+
+/** game screen: board, dice, messages **/
+.dice {
+  position: absolute;
+  display: none;
+  visibility: visible;
+  top: 6rem;
+  left: 1rem;
+  width: 3rem;
+  height: 3rem;
+  background: white;
+  border-radius: $border-radius;
+  box-shadow: 0 1.5em 0.5em -1em rgba(0, 0, 0, 0.042);
+  z-index:1;
+  &::before {
+    content: "";
+    display: block; 
+    height: 100%; 
+    width: 100%;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding-top: 0.5rem;
+    background-repeat: no-repeat;
+    background-position: center center;
+  }
+}
+
+
+@for $i from 1 to 5 {
+  #turn#{$i}:checked ~ .game-time:checked ~ [name=cb-player#{$i}]:checked + label + input + label,
+  #turn#{$i}:checked ~ .game-time:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label, 
+  #turn#{$i}:checked ~ .game-time:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label,
+  #turn#{$i}:checked ~ .game-time:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label,
+  #turn#{$i}:checked ~ .game-time:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label + input + label,
+  #turn#{$i}:checked ~ .game-time:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label + input + label + input + label {
+    display: block;
+    left: 1rem;
+    text-align: center;
+    animation: changeOrder $animation-time infinite;
+    -webkit-animation: changeOrder $animation-time infinite;
+  }
+}
+
+@for $i from 1 to 5 {
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label { animation-delay: 0s !important; }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label { animation-delay: -$animation-time/6 !important; }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label { animation-delay: -2*$animation-time/6 !important; }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label { animation-delay: -3*$animation-time/6 !important; }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label + input + label { animation-delay: -4*$animation-time/6 !important; }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label + input + label + input + label { animation-delay: -5*$animation-time/6 !important; }
+}
+
+@for $i from 1 to 5 {
+  
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label::before { background-image: 
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='8' /></svg>");
+       }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label::before { background-image: 
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='23' cy='77' r='8' /><circle cx='77' cy='23' r='8' /></svg>"); }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label::before { background-image: 
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='23' cy='77' r='8' /><circle cx='77' cy='23' r='8' /><circle cx='50' cy='50' r='8' /></svg>"); }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label::before { background-image: 
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='23' cy='23' r='8' /><circle cx='77' cy='23' r='8' /><circle cx='77' cy='77' r='8' /><circle cx='23' cy='77' r='8' /></svg>"); }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label + input + label::before { background-image: 
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='23' cy='23' r='8' /><circle cx='77' cy='23' r='8' /><circle cx='77' cy='77' r='8' /><circle cx='23' cy='77' r='8' /><circle cx='50' cy='50' r='8' /></svg>"); }
+  #turn#{$i}:checked ~ [name=cb-player#{$i}]:checked + label + input + label + input + label + input + label + input + label + input + label + input + label::before { background-image: 
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='23' cy='23' r='8' /><circle cx='77' cy='23' r='8' /><circle cx='77' cy='77' r='8' /><circle cx='23' cy='77' r='8' /><circle cx='23' cy='50' r='8' /><circle cx='77' cy='50' r='8' /></svg>"); }
+  
+}
+
+
+// label:active adapted from solution by Temani Afif. Ref: https://stackoverflow.com/a/51451218/3695983 
+label.dice:active {
+  position:static !important; 
+  margin-left: 50px !important;
+  background: none !important;
+  font-size: 0;
+  &::before {
+    content:"";
+    position:absolute;
+    top:0;
+    right:-50px;
+    left:0;
+    bottom:0;
+    z-index:200;
+  }
+}
+  
+#game {
+  display: none;
+  .tab {
+    position: absolute;
+    top: 0;
+    background: white;
+    border-radius: 0 0 3px 3px;
+    box-shadow: 0 1.5em 0.5em -1em rgba(0, 0, 0, 0.25);
+    z-index: 9;
+    float:left;
+    margin-left: 1rem;
+    &::before {
+      text-align: center;
+      display: block;
+      padding: 6px 16px;
+      color: white;
+      background: $color-blue;
+      height: 0.7rem;
+      line-height: 0.7rem;
+      font-size: 0.75rem;
+      font-weight: bold;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 0.95rem; 
+    }
+    &::after, &#player-info span {
+      display: block;
+      text-align: center;
+      padding: 6px 16px;
+      height: 2rem;
+      line-height: 1.9rem;
+      white-space: nowrap;
+    }
+    &#player-info {
+      min-width: 100px;
+      &::before { content: "Turn"; }
+      span { 
+        font-weight: bolder;
+        &::before {
+          content: "\25CF\00A0";
+        }
+        &::after {
+          content: " 1"; 
+          font-weight: bolder; 
+        }
+      }
+    }
+    &#dice {
+      cursor: pointer;
+      &::before { content: "Dice"; }
+      &::after { 
+        content: "Roll"; 
+      }
+    }
+    &#more-info {
+      cursor: pointer;
+      left: auto;
+      right: 1rem;
+      width: 100px;
+      z-index: 1;
+      &::before { content: "About"; }
+      &::after { content: "More info" }
+    }
+    &#action {
+      cursor: pointer;
+      left: calc(100px + 1rem);
+      width: 100px;
+      &::before { content: "Action"; }
+      &::after { content: "Next player" }
+      label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        cursor: pointer;
+      }
+    }
+  }
+  #board {
+    width: 70%;
+    max-width: 500px;
+    border: 3px solid $color-blue;
+    border-radius: $border-radius * 2;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    background: white;
+    margin-top: 2.5rem;
+    box-shadow: 0 1.5em 0.5em -1em rgba(0, 0, 0, 0.25);
+    .tile {
+      float: left;
+      width: 10%;
+      position: relative;
+      height: 0;
+      padding-top: 10%;
+      box-sizing: border-box;
+      border-left: 1px solid rgba(0,0,0,0.1);
+      border-right: 1px solid rgba(0,0,0,0.1);
+      border-top: 1px solid rgba(0,0,0,1);
+      border-bottom: 1px solid rgba(0,0,0,1);
+      background: lighten(#9ad0ac,15%);
+      &::before {
+        content: attr(data-index);
+        position: absolute;
+        top: 0rem;
+        left: 0.15rem;
+        font-size: 0.66rem;
+      }
+      &.tile6, &.tile12, &.tile18, &.tile22, &.tile23, &.tile28, &.tile30, &.tile34, &.tile36, &.tile39, &.tile55, &.tile79 {
+        &::before {
+          left: auto;
+          right: 0.15rem;
+        }
+      }
+      &.tile52::before {
+        top:auto;
+        bottom:0rem;
+      }
+      &.tile76::before {
+        left: 0.6rem;
+      }
+    }
+    @for $i from 1 to 11 {
+      .tile#{$i} { border-bottom: 1px solid transparent; }
+      .tile#{$i+90} { border-top: 1px solid transparent; }
+      .tile#{$i*10} { border-top: 1px solid rgba(0,0,0,0.1); }
+      .tile#{$i*10+1} { border-bottom: 1px solid rgba(0,0,0,0.1); }
+    }
+    .tile1, .tile15, .tile24, .tile38, .tile49, .tile55, .tile65, .tile76, .tile86, .tile94 {
+      background: lighten(#f198b4, 15%);
+    }
+
+    .tile2, .tile16, .tile23, .tile35, .tile42, .tile56, .tile64, .tile79, .tile87, .tile93 {
+      background: lighten(#C3D9FF, 8%);
+    }
+
+    .tile3, .tile18, .tile26, .tile33, .tile41, .tile58, .tile68, .tile78, .tile81, .tile96 {
+      background: lighten(#f89448, 30%);
+    }
+
+    .tile4, .tile11, .tile29, .tile40, .tile47, .tile51, .tile61, .tile77, .tile88, .tile99 {
+      background: lighten(#c297c5, 23%);
+    }
+
+    .tile5, .tile19, .tile27, .tile32, .tile44, .tile59, .tile69, .tile80, .tile89, .tile97 {
+      background: lighten(#68caef, 18%);
+    }
+
+    .tile6, .tile20, .tile28, .tile31, .tile45, .tile60, .tile70, .tile75, .tile85, .tile98 {
+      background: lighten(#fef471, 21%);
+    }
+
+    .tile7, .tile13, .tile21, .tile36, .tile50, .tile53, .tile63, .tile74, .tile84, .tile91 {
+      background: lighten(#b9e6fd, 5%);
+    }
+
+    .tile8, .tile12, .tile30, .tile39, .tile46, .tile52, .tile62, .tile73, .tile90, .tile100 {
+      background: lighten(#e5b75f,19%);
+    }
+
+    .tile9, .tile14, .tile22, .tile37, .tile48, .tile54, .tile66, .tile72, .tile83, .tile96 {
+      background: lighten(#f37859,20%);
+    }
+  }
+}
+
+#action label { display: none; }
+#players1:checked ~ #turn1:checked ~ #game-time:checked ~ #game #action { display:none; }
+#players1:checked ~ #turn1:checked ~ #game #turn-changer1 { display: block; }
+#players2:checked ~ #turn1:checked ~ #game #turn-changer2 { display: block; }
+#players3:checked ~ #turn1:checked ~ #game #turn-changer2 { display: block; }
+#players4:checked ~ #turn1:checked ~ #game #turn-changer2 { display: block; }
+#players2:checked ~ #turn2:checked ~ #game #turn-changer1 { display: block; }
+#players3:checked ~ #turn2:checked ~ #game #turn-changer3 { display: block; }
+#players4:checked ~ #turn2:checked ~ #game #turn-changer3 { display: block; }
+#players3:checked ~ #turn3:checked ~ #game #turn-changer1 { display: block; }
+#players4:checked ~ #turn3:checked ~ #game #turn-changer4 { display: block; }
+#players4:checked ~ #turn4:checked ~ #game #turn-changer1 { display: block; }
+
+// assign colors to the game pieces according to the color scheme selected
+// TODO: this probably can be reduced with SASS as well as the code above for piece colors
+#turn1:checked ~ #colors1:checked ~ #game #player-info span::before { color: $color-green; }
+#turn2:checked ~ #colors1:checked ~ #game #player-info span::before { color: $color-blue; }
+#turn3:checked ~ #colors1:checked ~ #game #player-info span::before { color: $color-red; }
+#turn4:checked ~ #colors1:checked ~ #game #player-info span::before { color: $color-yellow; }
+#turn1:checked ~ #colors2:checked ~ #game #player-info span::before { color: $color-blue; }
+#turn2:checked ~ #colors2:checked ~ #game #player-info span::before { color: $color-red; }
+#turn3:checked ~ #colors2:checked ~ #game #player-info span::before { color: $color-yellow; }
+#turn4:checked ~ #colors2:checked ~ #game #player-info span::before { color: $color-green; }
+#turn1:checked ~ #colors3:checked ~ #game #player-info span::before { color: $color-red; }
+#turn2:checked ~ #colors3:checked ~ #game #player-info span::before { color: $color-yellow; }
+#turn3:checked ~ #colors3:checked ~ #game #player-info span::before { color: $color-green; }
+#turn4:checked ~ #colors3:checked ~ #game #player-info span::before { color: $color-blue; }
+#turn1:checked ~ #colors4:checked ~ #game #player-info span::before { color: $color-yellow; }
+#turn2:checked ~ #colors4:checked ~ #game #player-info span::before { color: $color-green; }
+#turn3:checked ~ #colors4:checked ~ #game #player-info span::before { color: $color-blue; }
+#turn4:checked ~ #colors4:checked ~ #game #player-info span::before { color: $color-red; }
+
+@for $i from 1 to 5 {
+  #turn#{$i}:checked ~ #game .tab#player-info span::after{
+    content: " #{$i}";
+  }
+}
+
+// show the game board when Start is pressed
+#game-time:checked ~ #game {
+  display: block;
+}
+
+svg {
+  &#snakeladders{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    g {
+      &.ladders-big {
+        stroke: #8B4513;
+        stroke-width: 4;
+        stroke-linecap: round;
+      }
+      &.ladders-small {
+        stroke: #8B4513;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+      }
+    }
+  }
+  .snake {
+    stroke: none;
+  }
+  .eye {
+    fill: black;
+    stroke: white;
+    stroke-width: 6;
+  }
+  &.piece {
+    position: absolute;
+    width: 8%;
+    bottom: 0;
+    left: 0;
+    transform: translate(-2%, -2%);
+    -webkit-transform: translate(-2%, -2%);
+    transition: bottom 0.5s, left 0.5s;
+    g {
+      fill: $color-red;
+      stroke-width: 4;
+      stroke: rgba(0,0,0,0.3);
+    }
+    &#piece-player-1 {
+      transform: translate(-5%, -3%);
+      -webkit-transform: translate(-5%, -3%);
+      z-index:44;
+      g {
+        fill: $color-red;
+      }
+    }
+    &#piece-player-2 {
+      transform: translate(40%, -40%);
+      -webkit-transform: translate(40%, -40%);
+      z-index: 41;
+      g {
+        fill: $color-blue;
+      }
+    }
+    &#piece-player-3 {
+      transform: translate(42%, -7%);
+      -webkit-transform: translate(42%, -7%);
+      z-index: 43;
+      g {
+        fill: $color-green;
+      }
+    }
+    &#piece-player-4 {
+      transform: translate(-3%, -41%);
+      -webkit-transform: translate(-3%, -41%);
+      z-index: 42;
+      g {
+        fill: $color-yellow;
+      }
+    }
+  }
+}
+
+// generate the different positions on each tile
+$positions: 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0;
+@for $i from 1 through 4 {
+  #cb-pl#{$i+"-0"}:checked ~ #game #piece-player-#{$i} {
+    left: -10%;
+    bottom: 0;
+  }
+  @for $j from 1 to 101 {
+    #cb-pl#{$i}-#{$j}:checked {
+      ~ #game #piece-player-#{$i} { 
+        left: nth($positions, (($j - 1) % 20) + 1) * 1%; 
+        bottom: nth($positions, floor(($j - 1) / 10) + 1) * 1%; 
+      }  
+    }
+  }
+  @for $j from 101 to 107 {
+    #cb-pl#{$i}-#{$j}:checked {
+      ~ #game #piece-player-#{$i} { 
+        left: 0;
+        bottom: 90%;
+      }
+    }
+  }
+}
+
+// hide the players that are not active
+@for $i from 1 to 5 {
+  @for $j from $i+1 to 5 {
+    #players#{$i}:checked ~ #game #piece-player-#{$j} { 
+      display: none !important; 
+    }
+  }
+}
+
+
+// all these popups have a similar code below that could be reduced with a mixin (TODO)
+#snake-popup, #ladder-popup, #home-popup, #congratulations {
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0s;
+  label {
+    display: none;
+  }
+  svg {
+    height:100%;
+    position:absolute;
+    right:0;
+    top:0;
+    transform:translate(80%, 0);
+  }
+}
+
+// when we fall in a ladder, show the ladder popup
+@each $l in $ladders {
+  .cb[id$='-#{$l}'] {
+    &:checked {
+      ~ .dice { 
+        display: none !important; 
+      }
+      ~ #ladder-popup {
+        opacity: 1;
+        z-index: 99999;
+        transition: opacity 0.15s;
+        transition-delay: 0.5s;
+        -webkit-transition-delay: 0.5s;
+        label {
+          background: $color-green;
+          border-radius: $border-radius;
+          color: white;
+          padding: 6px 1rem;
+          cursor: pointer;
+          transition: background 0.5s;
+          margin-top: 1rem;
+          &:hover {
+            background: darken($color-green, 5%);
+          }
+        }
+      }
+    }
+  }
+}
+
+// when we fall in a ladder, show the ladder popup
+@each $s in $snakes {
+  .cb[id$='-#{$s}'] {
+    &:checked {
+      ~ .dice { 
+        display: none !important; 
+      }
+      ~ #snake-popup {
+        opacity: 1;
+        z-index: 99999;
+        transition: opacity 0.15s;
+        transition-delay: 0.5s;
+        -webkit-transition-delay: 0.5s;
+        label {
+          background: $color-green;
+          border-radius: $border-radius;
+          color: white;
+          padding: 6px 1rem;
+          cursor: pointer;
+          transition: background 0.5s;
+          margin-top: 1rem;
+          &:hover {
+            background: darken($color-green, 5%);
+          }
+        }
+      }
+    }
+  }
+}
+
+// when we fall in a ladder, show the ladder popup
+@for $s from 101 to 107 {
+  .cb[id$='-#{$s}'] {
+    &:checked {
+      ~ .dice { 
+        display: none !important; 
+      }
+      ~ #home-popup {
+        opacity: 1;
+        z-index: 99999;
+        transition: opacity 0.15s;
+        transition-delay: 0.5s;
+        -webkit-transition-delay: 0.5s;
+        label {
+          background: $color-green;
+          border-radius: $border-radius;
+          color: white;
+          padding: 6px 1rem;
+          cursor: pointer;
+          transition: background 0.5s;
+          margin-top: 1rem;
+          &:hover {
+            background: darken($color-green, 5%);
+          }
+        }
+      }
+    }
+  }
+}
+
+// show the right button in the ladder/snake popup
+@for $i from 1 to 5 {
+  @each $l in $ladders {
+    #cb-pl#{$i}-#{$l}:checked ~ #ladder-popup #ladder-pl#{$i}-#{$l} { display: inline-block; }
+  }
+  @each $s in $snakes {
+    #cb-pl#{$i}-#{$s}:checked ~ #snake-popup #snake-pl#{$i}-#{$s} { display: inline-block; }
+  }
+  @for $j from 101 to 107 {
+    #cb-pl#{$i}-#{$j}:checked ~ #home-popup #home-pl#{$i}-#{$j} { display: inline-block; }
+  }
+}
+
+.cb[id$='-100']:checked {
+  ~ #congratulations {
+    opacity: 1;
+    z-index: 99999;
+    transition: opacity 0.15s;
+    transition-delay: 0.5s;
+    -webkit-transition-delay: 0.5s;
+  }
+}
+
+@media (max-width: 400px) {
+  #game {
+    #board .tile::before {
+      font-size: 0.4rem;
+    }
+    .tab {
+      &::before {
+        font-size: 0.65rem;
+      }
+      &::after, &#player-info span {
+        font-size: 0.9rem;
+        height: 1.5rem;
+        line-height: 1.4rem;
+      }
+    }
+  }
+}

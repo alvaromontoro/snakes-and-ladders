@@ -10,5 +10,6 @@ This is a multiplayer version (1-4 players) developed using HTML and CSS **witho
 Current and older versions playable on CodePen: 
 
 - [Current 1-4 player version](https://codepen.io/alvaromontoro/details/gjWPNW/)
+- [Current 1-4 player version (with animated dice)](https://codepen.io/alvaromontoro/pen/OwwQMm/)
 - [Simplified two-player version](https://codepen.io/alvaromontoro/details/zLNdZQ/)
 - [One-player version](https://codepen.io/alvaromontoro/pen/ejzJBJ/)
